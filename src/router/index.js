@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
+import middlewares from './middlewares'
+import { checkTokenTime } from '@/utils/auth'
+import store from '@/store/'
 // Routes
-import { canNavigate } from '@/libs/acl/routeProtection'
-import { isUserLoggedIn, getUserData, getHomeRouteForLoggedInUser } from '@/auth/utils'
 import apps from './routes/apps'
 import dashboard from './routes/dashboard'
 import uiElements from './routes/ui-elements/index'
@@ -11,6 +11,7 @@ import pages from './routes/pages'
 import chartsMaps from './routes/charts-maps'
 import formsTable from './routes/forms-tables'
 import others from './routes/others'
+import house from './routes/house'
 
 Vue.use(VueRouter)
 
@@ -29,6 +30,7 @@ const router = new VueRouter({
     ...formsTable,
     ...uiElements,
     ...others,
+    ...house,
     {
       path: '*',
       redirect: 'error-404',
@@ -36,23 +38,15 @@ const router = new VueRouter({
   ],
 })
 
-router.beforeEach((to, _, next) => {
-  const isLoggedIn = isUserLoggedIn()
-
-  if (!canNavigate(to)) {
-    // Redirect to login if not logged in
-    if (!isLoggedIn) return next({ name: 'auth-login' })
-
-    // If logged in => not authorized
-    return next({ name: 'misc-not-authorized' })
+router.beforeEach((to, from, next) => {
+  if (to.meta && to.meta.middleware) {
+    if (middlewares[to.meta.middleware]) {
+      const $res = middlewares[to.meta.middleware](store)
+      if (!$res || !checkTokenTime()) {
+        return next({ name: 'auth-login' })
+      }
+    }
   }
-
-  // Redirect if logged in
-  if (to.meta.redirectIfLoggedIn && isLoggedIn) {
-    const userData = getUserData()
-    next(getHomeRouteForLoggedInUser(userData ? userData.role : null))
-  }
-
   return next()
 })
 

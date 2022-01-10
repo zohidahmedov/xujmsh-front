@@ -10,7 +10,7 @@ const service = axios.create({
 })
 service.interceptors.request.use(
   config => {
-    store.commit('app/TOGGLE_OVERLAY', true)
+    // store.commit('app/TOGGLE_OVERLAY', true)
     const token = getToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -34,7 +34,7 @@ service.interceptors.response.use(
     return res
   },
   error => {
-    store.commit('app/TOGGLE_OVERLAY', false)
+    // store.commit('app/TOGGLE_OVERLAY', false)
     errorsAlert(error.response)
     if (error.response.status == 401) {
       logout()
@@ -45,7 +45,7 @@ service.interceptors.response.use(
 
 function logout() {
   clearForLogout()
-  return router.push({ name: 'Login' })
+  return router.push({ name: 'auth-login' })
 }
 
 export default service

@@ -2,10 +2,11 @@ import request from '../libs/axios'
 
 const slug = '/auth'
 
-export function login() {
+export function login(data) {
   return request({
     url: `${slug}/login`,
     method: 'post',
+    data,
   })
 }
 export function me() {
