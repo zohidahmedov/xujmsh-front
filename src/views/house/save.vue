@@ -17,7 +17,7 @@
       >
         <b-form-group
           label="Uy raqami"
-          label-for="login-email"
+          label-for="login-number"
         >
           <validation-provider
             #default="{ errors }"
@@ -26,11 +26,31 @@
             rules="required"
           >
             <b-form-input
-              id="login-email"
+              id="login-number"
               v-model="form.number"
               :state="errors.length > 0 ? false:null"
               name="login-email"
               placeholder="188-A"
+            />
+            <small class="text-danger">{{ errors[0] }}</small>
+          </validation-provider>
+        </b-form-group>
+        <b-form-group
+          label="Uy manzili"
+          label-for="login-address"
+        >
+          <validation-provider
+            #default="{ errors }"
+            name="Uy raqami"
+            vid="email"
+            rules="required"
+          >
+            <b-form-input
+              id="login-address"
+              v-model="form.address"
+              :state="errors.length > 0 ? false:null"
+              name="login-email"
+              placeholder="Navoiy shaxri, Tinchlik ko'chasi"
             />
             <small class="text-danger">{{ errors[0] }}</small>
           </validation-provider>
@@ -42,38 +62,45 @@
 
 <script>
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
-import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
+import { showToast } from '@/utils/toast'
+import { required } from '@validations'
 import {
-  BModal, BFormGroup, BFormInput, BButton, BForm,
+  BModal, BFormGroup, BFormInput, BForm,
 } from 'bootstrap-vue'
 import { mapActions } from 'vuex'
 
 export default {
   name: 'Create',
   components: {
-    BModal, ValidationProvider, ValidationObserver, BFormGroup, BFormInput, BButton, BForm,
+    BModal, ValidationProvider, ValidationObserver, BFormGroup, BFormInput, BForm,
   },
   data() {
     return {
       form: {
         id: null,
         number: null,
+        address: null,
       },
       visible: false,
+      required,
     }
   },
   methods: {
     save() {
       if (this.validationForm()) {
         this.method(this.form).then((res) => {
-          this.showToast('success', 'Muvaffaqiyatli saqlandi', 'CheckCircleIcon')
+          showToast('success', 'Muvaffaqiyatli saqlandi', 'CheckCircleIcon')
+          this.$emit('onSuccess')
         }).catch((err) => {
-          this.showToast('danger', 'Xatolik', 'XIcon')
+          showToast('danger', 'Xatolik', 'XIcon')
         })
+      } else {
+        showToast('warning', 'Talab qilingan maydonlarni to\'ldiring')
       }
     },
-    edit(id) {
-
+    edit(item) {
+      this.form = { ...item }
+      this.visible = true
     },
     method(data) {
       if (this.form.id) return this.update(data)
@@ -85,16 +112,6 @@ export default {
         validated = success
       })
       return validated
-    },
-    showToast(type, message, icon) {
-      this.$toast({
-        component: ToastificationContent,
-        props: {
-          title: message,
-          icon,
-          variant: type,
-        },
-      })
     },
     ...mapActions({ store: 'house/store', update: 'house/update' }),
   },

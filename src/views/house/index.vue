@@ -1,50 +1,65 @@
 <template>
   <b-card>
-    <save ref="saveForm" />
-    <good-table-column-search
-      :items="items.data"
-      :columns="columns"
-      :total="items.total"
-      :page="page"
-      :filter="filterModel"
-      @getItems="getItems"
-      @add="$refs.saveForm.visible = true"
-      @edit="(id) => $refs.saveForm.edit(id)"
-      @delete="destroy"
-      @onPageChange="(p) => page = p"
+    <save
+      ref="saveForm"
+      @onSuccess="getItems"
     />
+    <b-overlay :show="loading">
+      <good-table-column-search
+        :items="items.data"
+        :columns="columns"
+        :total="items.total"
+        :page="page"
+        :filter="filterModel"
+        @getItems="getItems"
+        @add="$refs.saveForm.visible = true"
+        @edit="(item) => $refs.saveForm.edit(item)"
+        @delete="destroy"
+        @onPageChange="(p) => page = p"
+      />
+    </b-overlay>
   </b-card>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { BCard } from 'bootstrap-vue'
+import { BCard, BOverlay } from 'bootstrap-vue'
 import GoodTableColumnSearch from '../table/vue-good-table/GoodTableColumnSearch.vue'
 import Save from './save'
-
+import { showToast } from '@/utils/toast'
 export default {
   name: 'Index',
   components: {
-    GoodTableColumnSearch, BCard, Save
+    GoodTableColumnSearch, BCard, Save, BOverlay,
   },
   data() {
     return {
       page: 1,
+      loading: false,
       filterModel: {
         per_page: 10,
-        name: null,
+        number: null,
+        address: null,
       },
       columns: [
         {
           label: '#',
-          field: 'number',
+          field: 'row_number',
         },
         {
           label: 'Uy raqami',
-          field: 'name',
+          field: 'number',
           filterOptions: {
             enabled: true,
             placeholder: '188-A',
+          },
+        },
+        {
+          label: 'Uy manzili',
+          field: 'address',
+          filterOptions: {
+            enabled: true,
+            placeholder: 'Navoiy shaxri, Tinchlik ko\'chasi',
           },
         },
         {
@@ -63,20 +78,42 @@ export default {
     page(newVal, oldVal) {
       if (newVal && newVal !== oldVal) this.getItems()
     },
+    'filterModel.per_page'(newVal, oldVal) {
+      if (newVal && newVal !== oldVal) this.getItems()
+    },
   },
   created() {
     this.getItems()
   },
   methods: {
-    ...mapActions({ getItemsAction: 'house/index' }),
+    ...mapActions({ getItemsAction: 'house/index', destroyAction: 'house/destroy' }),
     async getItems() {
       this.loading = true
       await this.getItemsAction({ ...this.filterModel, page: this.page })
       this.loading = false
     },
     destroy(id) {
-
-    }
+      this.$bvModal
+        .msgBoxConfirm('Rostan ham o\'chirmoqchimisiz', {
+          title: 'Tasdiqlang',
+          size: 'sm',
+          variant: 'warning',
+          okVariant: 'primary',
+          okTitle: 'Ha',
+          cancelTitle: 'Yo\'q',
+          cancelVariant: 'outline-secondary',
+          hideHeaderClose: false,
+          centered: true,
+        })
+        .then(value => {
+          this.destroyAction(id).then(res => {
+            showToast('success', 'Muvaffaqiyatli o\'chirildi')
+            this.getItems()
+          }).catch(() => {
+            showToast('success', 'Muvaffaqiyatli o\'chirildi')
+          })
+        })
+    },
   },
 }
 </script>

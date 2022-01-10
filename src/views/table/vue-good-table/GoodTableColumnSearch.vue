@@ -29,8 +29,8 @@
         slot="table-row"
         slot-scope="props"
       >
-        <span v-if="props.column.field === 'number'">
-          {{ props }}
+        <span v-if="props.column.field === 'row_number'">
+          {{ getRowNumber(props.index) }}
         </span>
         <span v-else-if="props.column.field === 'name'">
           <b-link :to="{ name: 'organization-show', params: { tin: props.row.tin }, query: { company_name: props.row.name, territory_level_id: props.row.territory_level_id } }">{{ props.row.name }}</b-link>
@@ -49,7 +49,7 @@
                   class="text-body align-middle mr-25"
                 />
               </template>
-              <b-dropdown-item @click="$emit('edit', props.row.id)">
+              <b-dropdown-item @click="$emit('edit', props.row)">
                 <feather-icon
                   icon="Edit2Icon"
                   class="mr-50"
@@ -127,7 +127,7 @@
 
 <script>
 import {
-  BPagination, BFormSelect, BCard, BLink, BButton,
+  BPagination, BFormSelect, BCard, BLink, BButton, BDropdown, BDropdownItem
 } from 'bootstrap-vue'
 import { VueGoodTable } from 'vue-good-table'
 import 'vue-good-table/dist/vue-good-table.css'
@@ -141,6 +141,8 @@ export default {
     BPagination,
     BFormSelect,
     BButton,
+    BDropdown,
+    BDropdownItem,
   },
   props: {
     columns: {
@@ -167,6 +169,12 @@ export default {
         return 0
       },
     },
+    page: {
+      type: Number,
+      default() {
+        return 1
+      },
+    },
   },
   data() {
     return {
@@ -187,11 +195,16 @@ export default {
   },
   methods: {
     onColumnFilter(params) {
-      this.filter.name = params.columnFilters.name ? params.columnFilters.name : null
+      this.columns.filter(item => (item.filterOptions && item.filterOptions.enabled)).forEach(item => {
+        this.filter[item.field] = params.columnFilters[item.field] ? params.columnFilters[item.field] : null
+      })
       this.$emit('getItems')
     },
     onPageChange(page) {
       this.$emit('onPageChange', page)
+    },
+    getRowNumber(index) {
+      return ((this.page - 1) * this.filter.per_page) + index + 1
     },
   },
 }
