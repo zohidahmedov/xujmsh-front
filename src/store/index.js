@@ -9,6 +9,8 @@ import verticalMenu from './vertical-menu'
 import alert from './alert'
 import auth from './auth'
 import house from './house'
+import flat from './flat'
+import service from './service'
 
 Vue.use(Vuex)
 
@@ -20,6 +22,8 @@ export default new Vuex.Store({
     alert,
     auth,
     house,
+    flat,
+    service,
     'app-ecommerce': ecommerceStoreModule,
   },
   strict: process.env.DEV,

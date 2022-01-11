@@ -9,7 +9,7 @@
           @click="$emit('add')"
         >
           <feather-icon icon="PlusIcon" />
-          Uy qo'shish
+          {{ modelName }} qo'shish
         </b-button>
       </div>
     </template>
@@ -173,6 +173,12 @@ export default {
       type: Number,
       default() {
         return 1
+      },
+    },
+    modelName: {
+      type: String,
+      default() {
+        return ''
       },
     },
   },

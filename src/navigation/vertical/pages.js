@@ -4,4 +4,14 @@ export default [
     icon: 'HomeIcon',
     route: 'house-index',
   },
+  {
+    title: 'Xonadonlar ro\'yxati',
+    icon: 'LayoutIcon',
+    route: 'flat-index',
+  },
+  {
+    title: 'Xizmatlar ro\'yxati',
+    icon: 'GridIcon',
+    route: 'service-index',
+  },
 ]

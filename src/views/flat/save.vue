@@ -5,7 +5,7 @@
     ok-title="Saqlash"
     cancel-title="Bekor qilish"
     centered
-    title="Uy qo'shish"
+    title="Xonadon qo'shish"
     @ok="save"
   >
     <validation-observer
@@ -63,12 +63,12 @@
 <script>
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import { showToast } from '@/utils/toast'
+import { clearObject } from '@/utils'
 import { required } from '@validations'
 import {
   BModal, BFormGroup, BFormInput, BForm,
 } from 'bootstrap-vue'
 import { mapActions } from 'vuex'
-import {clearObject} from "@/utils";
 
 export default {
   name: 'Create',
@@ -85,11 +85,6 @@ export default {
       visible: false,
       required,
     }
-  },
-  watch: {
-    visible(newVal) {
-      if (!newVal) clearObject(this.form)
-    },
   },
   methods: {
     save() {

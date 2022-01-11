@@ -14,4 +14,19 @@ export default [
       ],
     },
   },
+  {
+    path: '/services',
+    name: 'service-index',
+    component: () => import('@/views/service/index.vue'),
+    meta: {
+      middleware: 'Auth',
+      pageTitle: 'Xizmatlar ro\'yxati',
+      breadcrumb: [
+        {
+          text: 'Xizmatlar ro\'yxati',
+          active: true,
+        },
+      ],
+    },
+  },
 ]

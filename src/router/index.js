@@ -12,6 +12,7 @@ import chartsMaps from './routes/charts-maps'
 import formsTable from './routes/forms-tables'
 import others from './routes/others'
 import house from './routes/house'
+import flat from './routes/flat'
 
 Vue.use(VueRouter)
 
@@ -22,7 +23,7 @@ const router = new VueRouter({
     return { x: 0, y: 0 }
   },
   routes: [
-    { path: '/', redirect: { name: 'dashboard-ecommerce' } },
+    { path: '/', redirect: { name: 'house-index' } },
     ...apps,
     ...dashboard,
     ...pages,
@@ -31,6 +32,7 @@ const router = new VueRouter({
     ...uiElements,
     ...others,
     ...house,
+    ...flat,
     {
       path: '*',
       redirect: 'error-404',

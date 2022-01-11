@@ -11,7 +11,7 @@
         :total="items.total"
         :page="page"
         :filter="filterModel"
-        model-name="Uy"
+        model-name="Xonadon"
         @getItems="getItems"
         @add="$refs.saveForm.visible = true"
         @edit="(item) => $refs.saveForm.edit(item)"
@@ -40,6 +40,7 @@ export default {
       filterModel: {
         per_page: 10,
         number: null,
+        house_number: null,
         address: null,
       },
       columns: [
@@ -48,19 +49,59 @@ export default {
           field: 'row_number',
         },
         {
+          label: 'Shaxsiy raqam',
+          field: 'billing_number',
+          filterOptions: {
+            enabled: true,
+            placeholder: '00000000',
+          },
+        },
+        {
           label: 'Uy raqami',
-          field: 'number',
+          field: 'house.number',
           filterOptions: {
             enabled: true,
             placeholder: '188-A',
           },
         },
         {
-          label: 'Uy manzili',
-          field: 'address',
+          label: 'Xonadon raqami',
+          field: 'number',
           filterOptions: {
             enabled: true,
-            placeholder: 'Navoiy shaxri, Tinchlik ko\'chasi',
+            placeholder: '1',
+          },
+        },
+        {
+          label: 'FISH',
+          field: 'full_name',
+          filterOptions: {
+            enabled: true,
+            placeholder: 'Eshmatov Toshmat',
+          },
+        },
+        {
+          label: 'Telefon raqami',
+          field: 'phone',
+          filterOptions: {
+            enabled: true,
+            placeholder: '+998901234567',
+          },
+        },
+        {
+          label: 'Yashovchilar soni',
+          field: 'members_count',
+          filterOptions: {
+            enabled: true,
+            placeholder: '2',
+          },
+        },
+        {
+          label: 'Umumiy maydoni',
+          field: 'area',
+          filterOptions: {
+            enabled: true,
+            placeholder: '25.5',
           },
         },
         {
@@ -87,7 +128,7 @@ export default {
     this.getItems()
   },
   methods: {
-    ...mapActions({ getItemsAction: 'house/index', destroyAction: 'house/destroy' }),
+    ...mapActions({ getItemsAction: 'flat/index', destroyAction: 'flat/destroy' }),
     async getItems() {
       this.loading = true
       await this.getItemsAction({ ...this.filterModel, page: this.page })

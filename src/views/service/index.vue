@@ -11,7 +11,7 @@
         :total="items.total"
         :page="page"
         :filter="filterModel"
-        model-name="Uy"
+        model-name="Xizmat"
         @getItems="getItems"
         @add="$refs.saveForm.visible = true"
         @edit="(item) => $refs.saveForm.edit(item)"
@@ -48,19 +48,11 @@ export default {
           field: 'row_number',
         },
         {
-          label: 'Uy raqami',
-          field: 'number',
+          label: 'Xizmat nomi',
+          field: 'name',
           filterOptions: {
             enabled: true,
-            placeholder: '188-A',
-          },
-        },
-        {
-          label: 'Uy manzili',
-          field: 'address',
-          filterOptions: {
-            enabled: true,
-            placeholder: 'Navoiy shaxri, Tinchlik ko\'chasi',
+            placeholder: 'Majburiy badal',
           },
         },
         {
@@ -72,7 +64,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      items: 'house/GET_ITEMS',
+      items: 'service/GET_ITEMS',
     }),
   },
   watch: {
@@ -87,7 +79,7 @@ export default {
     this.getItems()
   },
   methods: {
-    ...mapActions({ getItemsAction: 'house/index', destroyAction: 'house/destroy' }),
+    ...mapActions({ getItemsAction: 'service/index', destroyAction: 'service/destroy' }),
     async getItems() {
       this.loading = true
       await this.getItemsAction({ ...this.filterModel, page: this.page })
@@ -107,12 +99,14 @@ export default {
           centered: true,
         })
         .then(value => {
-          this.destroyAction(id).then(res => {
-            showToast('success', 'Muvaffaqiyatli o\'chirildi')
-            this.getItems()
-          }).catch(() => {
-            showToast('success', 'Muvaffaqiyatli o\'chirildi')
-          })
+          if (value) {
+            this.destroyAction(id).then(res => {
+              showToast('success', 'Muvaffaqiyatli o\'chirildi')
+              this.getItems()
+            }).catch(() => {
+              showToast('success', 'Muvaffaqiyatli o\'chirildi')
+            })
+          }
         })
     },
   },

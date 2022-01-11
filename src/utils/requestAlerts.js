@@ -2,6 +2,7 @@ import store from '@/store'
 import errors from '@/utils/errors'
 
 export function errorsAlert(error) {
+  console.log('errorPushed', error)
   if (error && error.data && error.data.code) {
     const message = getMessage(error.data.code)
     if (message) {
@@ -22,13 +23,11 @@ export function errorsAlert(error) {
 
 function getMessage(code) {
   const error = getErrorByCode(code)
-  return error.ru
+  return error.name
 }
 
 function getErrorByCode(code) {
-  const apiErrors = store.getters['errors/ERRORS']
-  if (apiErrors && apiErrors.length) {
-    return apiErrors.find(err => err.id == code)
+  switch (code) {
+    case 401: return ''
   }
-  return null
 }
