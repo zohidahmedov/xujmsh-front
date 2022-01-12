@@ -1,9 +1,5 @@
 <template>
   <b-card>
-    <save
-      ref="saveForm"
-      @onSuccess="getItems"
-    />
     <b-overlay :show="loading">
       <good-table-column-search
         :items="items.data"
@@ -13,8 +9,8 @@
         :filter="filterModel"
         model-name="Uy"
         @getItems="getItems"
-        @add="$refs.saveForm.visible = true"
-        @edit="(item) => $refs.saveForm.edit(item)"
+        @add="$router.push({ name: 'house-create' })"
+        @edit="(item) => $router.push({ name: 'house-edit', params: { id: item.id } })"
         @delete="destroy"
         @onPageChange="(p) => page = p"
       />
@@ -26,12 +22,11 @@
 import { mapActions, mapGetters } from 'vuex'
 import { BCard, BOverlay } from 'bootstrap-vue'
 import GoodTableColumnSearch from '../table/vue-good-table/GoodTableColumnSearch.vue'
-import Save from './save'
 import { showToast } from '@/utils/toast'
 export default {
   name: 'Index',
   components: {
-    GoodTableColumnSearch, BCard, Save, BOverlay,
+    GoodTableColumnSearch, BCard, BOverlay,
   },
   data() {
     return {
