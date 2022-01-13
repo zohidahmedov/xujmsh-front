@@ -14,4 +14,9 @@ export default [
     icon: 'GridIcon',
     route: 'service-index',
   },
+  {
+    title: 'To\'lov turlari',
+    icon: 'DollarSignIcon',
+    route: 'payment-type-index',
+  },
 ]

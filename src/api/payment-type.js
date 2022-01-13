@@ -1,18 +1,12 @@
 import request from '../libs/axios'
 
-const slug = '/services'
+const slug = '/payment-types'
 
 export function index(params) {
   return request({
     url: slug,
     method: 'get',
     params,
-  })
-}
-export function calculatingTypes() {
-  return request({
-    url: 'calculating-types',
-    method: 'get',
   })
 }
 

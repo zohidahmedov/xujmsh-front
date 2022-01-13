@@ -52,7 +52,7 @@
               </validation-provider>
             </b-form-group>
           </b-col>
-          <b-col cols="12">
+          <b-col v-for="service in " cols="12">
             <b-form-group
               label="First Name"
               label-for="h-first-name"
@@ -105,6 +105,9 @@ export default {
     isCreate() {
       return this.$route.name === 'house-create'
     },
+    services() {
+      return this.$store.getters['service/GET_ITEMS']
+    },
   },
   watch: {
     visible(newVal) {
@@ -115,6 +118,7 @@ export default {
     if (this.isShow || this.isUpdate) {
       this.edit()
     }
+    this.getServices()
   },
   methods: {
     save() {
@@ -148,7 +152,7 @@ export default {
       })
       return validated
     },
-    ...mapActions({ store: 'house/store', update: 'house/update', show: 'house/show' }),
+    ...mapActions({ store: 'house/store', update: 'house/update', show: 'house/show', getServices: 'service/index' }),
   },
 }
 </script>

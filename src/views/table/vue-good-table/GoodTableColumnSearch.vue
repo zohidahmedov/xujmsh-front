@@ -202,7 +202,12 @@ export default {
   methods: {
     onColumnFilter(params) {
       this.columns.filter(item => (item.filterOptions && item.filterOptions.enabled)).forEach(item => {
-        this.filter[item.field] = params.columnFilters[item.field] ? params.columnFilters[item.field] : null
+        if (item.filterOptions.filterDropdownItems) {
+          const field = item.field.split('.')[0] + '_id'
+          this.filter[field] = params.columnFilters[item.field] ? params.columnFilters[item.field] : null
+        } else {
+          this.filter[item.field] = params.columnFilters[item.field] ? params.columnFilters[item.field] : null
+        }
       })
       this.$emit('getItems')
     },

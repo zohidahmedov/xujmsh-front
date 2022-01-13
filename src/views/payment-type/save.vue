@@ -17,12 +17,32 @@
         class="auth-login-form mt-2"
       >
         <b-form-group
-          label="Xizmat nomi"
+          label="Xizmat turi"
+          label-for="service_id"
+        >
+          <validation-provider
+            #default="{ errors }"
+            name="Xizmat turi"
+            rules="required"
+          >
+            <v-select
+              id="service_id"
+              v-model="form.service_id"
+              :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
+              label="name"
+              :reduce="(option) => option.id"
+              :options="services.data"
+            />
+            <small class="text-danger">{{ errors[0] }}</small>
+          </validation-provider>
+        </b-form-group>
+        <b-form-group
+          label="Nomi"
           label-for="name"
         >
           <validation-provider
             #default="{ errors }"
-            name="Xizmat nomi"
+            name="Nomi"
             rules="required"
           >
             <b-form-input
@@ -30,26 +50,28 @@
               v-model="form.name"
               :state="errors.length > 0 ? false:null"
               name="name"
-              placeholder="Majburiy badal"
+              placeholder="Nomi"
             />
             <small class="text-danger">{{ errors[0] }}</small>
           </validation-provider>
         </b-form-group>
         <b-form-group
-          label="Xizmat uchun to'lov shakli"
-          label-for="calculating_type_id"
+          label="Narxi"
+          label-for="amount"
         >
           <validation-provider
             #default="{ errors }"
-            name="Xizmat uchun to'lov shakli"
+            name="Nomi"
             rules="required"
           >
-            <v-select
-              v-model="form.calculating_type_id"
-              :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-              label="description"
-              :reduce="(option) => option.id"
-              :options="calculatingTypes"
+            <b-form-input
+              id="amount"
+              v-model="form.amount"
+              v-money="money"
+              class="v-money"
+              :state="errors.length > 0 ? false:null"
+              name="name"
+              placeholder="Nomi"
             />
             <small class="text-danger">{{ errors[0] }}</small>
           </validation-provider>
@@ -63,6 +85,7 @@
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import { showToast } from '@/utils/toast'
 import { required } from '@validations'
+import { VMoney } from 'v-money'
 import VSelect from 'vue-select'
 import {
   BModal, BFormGroup, BFormInput, BForm,
@@ -75,25 +98,37 @@ export default {
   components: {
     BModal, ValidationProvider, ValidationObserver, BFormGroup, BFormInput, BForm, VSelect,
   },
+  directives: { money: VMoney },
   data() {
     return {
       form: {
         id: null,
-        name: null,
-        calculating_type_id: null,
+        name: 'Oddiy',
+        service_id: null,
+        amount: null,
       },
       visible: false,
-      calculatingTypes: [],
       required,
+      money: {
+        decimal: '',
+        thousands: ' ',
+        prefix: '',
+        suffix: ' so\'m',
+        precision: 0,
+        masked: false,
+      },
     }
+  },
+  computed: {
+    services() {
+      return this.$store.getters['service/GET_ITEMS']
+    },
   },
   watch: {
     visible(newVal) {
       if (!newVal) setTimeout(() => { clearObject(this.form) }, 200)
       if (!this.calculatingTypes.length) {
-        this.getCalculatingTypes().then(res => {
-          this.calculatingTypes = res.data
-        })
+        this.getServices({ per_page: 999 })
       }
     },
   },
@@ -101,7 +136,9 @@ export default {
     async save() {
       const valid = await this.validationForm()
       if (valid) {
-        this.method(this.form).then(res => {
+        let form = { ...this.form }
+        form.amount = form.amount.replace(' so\'m', '')
+        this.method(form).then(res => {
           showToast('success', 'Muvaffaqiyatli saqlandi', 'CheckCircleIcon')
           this.$emit('onSuccess')
           this.visible = false
@@ -114,8 +151,9 @@ export default {
     },
     edit(item) {
       this.form.id = item.id
-      this.form.calculating_type_id = item.calculating_type_id
+      this.form.service_id = item.service_id
       this.form.name = item.name
+      this.form.amount = item.amount
       this.visible = true
     },
     method(data) {
@@ -129,7 +167,7 @@ export default {
       })
       return validated
     },
-    ...mapActions({ store: 'service/store', update: 'service/update', getCalculatingTypes: 'service/calculatingTypes' }),
+    ...mapActions({ store: 'paymentType/store', update: 'paymentType/update', getServices: 'service/index' }),
   },
 }
 </script>

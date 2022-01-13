@@ -74,4 +74,19 @@ export default [
       ],
     },
   },
+  {
+    path: '/payment-types',
+    name: 'payment-type-index',
+    component: () => import('@/views/payment-type/index.vue'),
+    meta: {
+      middleware: 'Auth',
+      pageTitle: 'To\'lov turlari',
+      breadcrumb: [
+        {
+          text: 'To\'lov turlari',
+          active: true,
+        },
+      ],
+    },
+  },
 ]

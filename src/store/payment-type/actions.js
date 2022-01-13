@@ -1,6 +1,6 @@
 import {
-  show, update, index, store, destroy, calculatingTypes,
-} from '@/api/service'
+  show, update, index, store, destroy,
+} from '@/api/payment-type'
 
 export const actions = {
   index({ commit }, query) {
@@ -48,15 +48,6 @@ export const actions = {
   destroy({ }, id) {
     return new Promise((resolve, reject) => {
       destroy(id).then(res => {
-        resolve(res)
-      }).catch(res => {
-        reject(res)
-      })
-    })
-  },
-  calculatingTypes({ commit }) {
-    return new Promise((resolve, reject) => {
-      calculatingTypes().then(res => {
         resolve(res)
       }).catch(res => {
         reject(res)

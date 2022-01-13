@@ -11,7 +11,7 @@
         :total="items.total"
         :page="page"
         :filter="filterModel"
-        model-name="Xizmat"
+        model-name="To'lov turi"
         @getItems="getItems"
         @add="$refs.saveForm.visible = true"
         @edit="(item) => $refs.saveForm.edit(item)"
@@ -26,7 +26,7 @@
 import { mapActions, mapGetters } from 'vuex'
 import { BCard, BOverlay } from 'bootstrap-vue'
 import GoodTableColumnSearch from '../table/vue-good-table/GoodTableColumnSearch.vue'
-import Save from './save'
+import Save from './save.vue'
 import { showToast } from '@/utils/toast'
 export default {
   name: 'Index',
@@ -39,9 +39,9 @@ export default {
       loading: false,
       filterModel: {
         per_page: 10,
-        number: null,
-        address: null,
-        calculating_type_id: null,
+        service_id: null,
+        name: null,
+        amount: null,
       },
       columns: [
         {
@@ -50,19 +50,27 @@ export default {
         },
         {
           label: 'Xizmat nomi',
-          field: 'name',
+          field: 'service.name',
           filterOptions: {
             enabled: true,
-            placeholder: 'Majburiy badal',
+            placeholder: 'Xizmat nomi',
+            filterDropdownItems: [],
           },
         },
         {
-          label: 'Xizmat uchun to\'lov shakli',
-          field: 'calculating_type.description',
+          label: 'Tavsif',
+          field: 'name',
           filterOptions: {
             enabled: true,
-            placeholder: 'Barchasi',
-            filterDropdownItems: [],
+            placeholder: 'Tavsif',
+          },
+        },
+        {
+          label: 'Narxi (so\'m)',
+          field: 'amount',
+          filterOptions: {
+            enabled: true,
+            placeholder: 'Narxi',
           },
         },
         {
@@ -74,7 +82,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      items: 'service/GET_ITEMS',
+      items: 'paymentType/GET_ITEMS',
     }),
   },
   watch: {
@@ -87,12 +95,12 @@ export default {
   },
   created() {
     this.getItems()
-    this.getCalculatingTypes().then(res => {
+    this.getServices({}).then(res => {
       this.columns.map(item => {
-        if (item.field === 'calculating_type.description') {
-          item.filterOptions.filterDropdownItems = res.data.map(i => {
+        if (item.field === 'service.name') {
+          item.filterOptions.filterDropdownItems = res.data.data.map(i => {
             i.value = i.id
-            i.text = i.description
+            i.text = i.name
             return i
           })
         }
@@ -100,7 +108,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions({ getItemsAction: 'service/index', destroyAction: 'service/destroy', getCalculatingTypes: 'service/calculatingTypes' }),
+    ...mapActions({ getItemsAction: 'paymentType/index', destroyAction: 'paymentType/destroy', getServices: 'service/index' }),
     async getItems() {
       this.loading = true
       await this.getItemsAction({ ...this.filterModel, page: this.page })
