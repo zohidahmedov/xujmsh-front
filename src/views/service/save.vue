@@ -54,6 +54,28 @@
             <small class="text-danger">{{ errors[0] }}</small>
           </validation-provider>
         </b-form-group>
+        <b-form-group
+          label="Oddiy to'lov uchun xizmat narxi"
+          label-for="amount"
+        >
+          <validation-provider
+            #default="{ errors }"
+            name="Narxi"
+            rules="required"
+          >
+            <b-form-input
+              id="amount"
+              v-model="form.default_amount"
+              v-money="money"
+              class="v-money"
+              :state="errors.length > 0 ? false:null"
+              name="Narxi"
+              placeholder="Narxi"
+            />
+            <small class="text-danger">{{ errors[0] }}</small>
+          </validation-provider>
+        </b-form-group>
+
       </b-form>
     </validation-observer>
   </b-modal>
@@ -69,22 +91,34 @@ import {
 } from 'bootstrap-vue'
 import { mapActions } from 'vuex'
 import { clearObject } from '@/utils'
+import { VMoney } from 'v-money'
 
 export default {
   name: 'Create',
   components: {
     BModal, ValidationProvider, ValidationObserver, BFormGroup, BFormInput, BForm, VSelect,
   },
+  directives: { money: VMoney },
   data() {
     return {
       form: {
         id: null,
         name: null,
         calculating_type_id: null,
+        default_amount: null,
+        default_name: 'Oddiy',
       },
       visible: false,
       calculatingTypes: [],
       required,
+      money: {
+        decimal: '',
+        thousands: ' ',
+        prefix: '',
+        suffix: ' so\'m',
+        precision: 0,
+        masked: false,
+      },
     }
   },
   watch: {
@@ -101,7 +135,10 @@ export default {
     async save() {
       const valid = await this.validationForm()
       if (valid) {
-        this.method(this.form).then(res => {
+        const form = { ...this.form }
+        form.default_amount = form.default_amount.replace(' so\'m', '')
+        form.default_amount = form.default_amount.replaceAll(' ', '')
+        this.method(form).then(res => {
           showToast('success', 'Muvaffaqiyatli saqlandi', 'CheckCircleIcon')
           this.$emit('onSuccess')
           this.visible = false
@@ -116,6 +153,7 @@ export default {
       this.form.id = item.id
       this.form.calculating_type_id = item.calculating_type_id
       this.form.name = item.name
+      this.form.amount = item.default_payment_type.amount
       this.visible = true
     },
     method(data) {

@@ -53,6 +53,10 @@ export default [
       pageTitle: 'Uyni ko\'rish',
       breadcrumb: [
         {
+          text: 'Uylar ro\'yxati',
+          to: { name: 'house-index' },
+        },
+        {
           text: 'Uyni ko\'rish',
           active: true,
         },

@@ -4,11 +4,17 @@ NOTE:
 ------
 PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
 WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
-@media (min-width: 576px) {
-  .modal-dialog {
-    max-width: 505px;
-  }
-}
 .v-money {
   text-align: right;
+}
+.prefix-provider {
+  position: relative;
+}
+.prefix-provider input {
+  padding-left: 46px!important;
+}
+.input-prefix {
+  position: absolute;
+  top: 9px;
+  left: 9px;
 }

@@ -46,7 +46,6 @@ export const actions = {
     })
   },
   destroy({ }, id) {
-    console.log(id)
     return new Promise((resolve, reject) => {
       destroy(id).then(res => {
         resolve(res)

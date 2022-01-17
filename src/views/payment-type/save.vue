@@ -28,6 +28,7 @@
             <v-select
               id="service_id"
               v-model="form.service_id"
+              :disabled="form.is_default"
               :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
               label="name"
               :reduce="(option) => option.id"
@@ -42,15 +43,16 @@
         >
           <validation-provider
             #default="{ errors }"
-            name="Nomi"
+            name="Narxi"
             rules="required"
           >
             <b-form-input
               id="name"
               v-model="form.name"
+              :disabled="form.is_default"
               :state="errors.length > 0 ? false:null"
-              name="name"
-              placeholder="Nomi"
+              name="Narxi"
+              placeholder="Narxi"
             />
             <small class="text-danger">{{ errors[0] }}</small>
           </validation-provider>
@@ -106,6 +108,7 @@ export default {
         name: 'Oddiy',
         service_id: null,
         amount: null,
+        is_default: null,
       },
       visible: false,
       required,
@@ -127,7 +130,7 @@ export default {
   watch: {
     visible(newVal) {
       if (!newVal) setTimeout(() => { clearObject(this.form) }, 200)
-      if (!this.calculatingTypes.length) {
+      if (!this.services.length) {
         this.getServices({ per_page: 999 })
       }
     },
@@ -136,8 +139,9 @@ export default {
     async save() {
       const valid = await this.validationForm()
       if (valid) {
-        let form = { ...this.form }
+        const form = { ...this.form }
         form.amount = form.amount.replace(' so\'m', '')
+        form.amount = form.amount.replaceAll(' ', '')
         this.method(form).then(res => {
           showToast('success', 'Muvaffaqiyatli saqlandi', 'CheckCircleIcon')
           this.$emit('onSuccess')
@@ -154,6 +158,7 @@ export default {
       this.form.service_id = item.service_id
       this.form.name = item.name
       this.form.amount = item.amount
+      this.form.is_default = item.is_default
       this.visible = true
     },
     method(data) {

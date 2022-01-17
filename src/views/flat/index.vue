@@ -61,7 +61,8 @@ export default {
           field: 'house.number',
           filterOptions: {
             enabled: true,
-            placeholder: '188-A',
+            placeholder: 'Barchasi',
+            filterDropdownItems: [],
           },
         },
         {
@@ -113,7 +114,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      items: 'house/GET_ITEMS',
+      items: 'flat/GET_ITEMS',
     }),
   },
   watch: {
@@ -126,9 +127,20 @@ export default {
   },
   created() {
     this.getItems()
+    this.getHouses({ per_page: 999 }).then(res => {
+      this.columns.map(item => {
+        if (item.field === 'house.number') {
+          item.filterOptions.filterDropdownItems = res.data.data.map(i => {
+            i.value = i.id
+            i.text = i.number
+            return i
+          })
+        }
+      })
+    })
   },
   methods: {
-    ...mapActions({ getItemsAction: 'flat/index', destroyAction: 'flat/destroy' }),
+    ...mapActions({ getItemsAction: 'flat/index', destroyAction: 'flat/destroy', getHouses: 'house/index' }),
     async getItems() {
       this.loading = true
       await this.getItemsAction({ ...this.filterModel, page: this.page })

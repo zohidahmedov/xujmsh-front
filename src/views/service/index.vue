@@ -66,6 +66,10 @@ export default {
           },
         },
         {
+          label: 'Oddiy to\'lov uchun xizmat narxi (so\'m)',
+          field: 'default_payment_type.amount',
+        },
+        {
           label: 'Amal',
           field: 'action',
         },

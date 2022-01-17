@@ -8,9 +8,11 @@
         :page="page"
         :filter="filterModel"
         model-name="Uy"
+        :has-show="true"
+        model="house"
         @getItems="getItems"
         @add="$router.push({ name: 'house-create' })"
-        @edit="(item) => $router.push({ name: 'house-edit', params: { id: item.id } })"
+        @edit="(item) => { return $router.push({ name: 'house-update', params: { id: item.id } }) }"
         @delete="destroy"
         @onPageChange="(p) => page = p"
       />
@@ -45,6 +47,7 @@ export default {
         {
           label: 'Uy raqami',
           field: 'number',
+          showField: true,
           filterOptions: {
             enabled: true,
             placeholder: '188-A',

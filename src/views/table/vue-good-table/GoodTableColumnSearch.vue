@@ -32,8 +32,8 @@
         <span v-if="props.column.field === 'row_number'">
           {{ getRowNumber(props.index) }}
         </span>
-        <span v-else-if="props.column.field === 'name'">
-          <b-link :to="{ name: 'organization-show', params: { tin: props.row.tin }, query: { company_name: props.row.name, territory_level_id: props.row.territory_level_id } }">{{ props.row.name }}</b-link>
+        <span v-else-if="props.column.showField && hasShow">
+          <b-link :to="{ name: model + '-show', params: { id: props.row.id } }">{{ props.row.number }}</b-link>
         </span>
         <span v-else-if="props.column.field === 'action'">
           <span>
@@ -49,14 +49,14 @@
                   class="text-body align-middle mr-25"
                 />
               </template>
-              <b-dropdown-item @click="$emit('edit', props.row)">
+              <b-dropdown-item v-if="hasEdit" @click="$emit('edit', props.row)">
                 <feather-icon
                   icon="Edit2Icon"
                   class="mr-50"
                 />
                 <span>Tahrirlash</span>
               </b-dropdown-item>
-              <b-dropdown-item @click="$emit('delete', props.row.id)">
+              <b-dropdown-item v-if="hasDelete" @click="$emit('delete', props.row.id)">
                 <feather-icon
                   icon="TrashIcon"
                   class="mr-50"
@@ -179,6 +179,30 @@ export default {
       type: String,
       default() {
         return ''
+      },
+    },
+    model: {
+      type: String,
+      default() {
+        return ''
+      },
+    },
+    hasShow: {
+      type: Boolean,
+      default() {
+        return false
+      },
+    },
+    hasEdit: {
+      type: Boolean,
+      default() {
+        return true
+      },
+    },
+    hasDelete: {
+      type: Boolean,
+      default() {
+        return true
       },
     },
   },
