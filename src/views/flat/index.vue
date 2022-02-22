@@ -11,6 +11,8 @@
         :total="items.total"
         :page="page"
         :filter="filterModel"
+        :has-show="true"
+        model="flat"
         model-name="Xonadon"
         @getItems="getItems"
         @add="$refs.saveForm.visible = true"
@@ -72,6 +74,7 @@ export default {
             enabled: true,
             placeholder: '1',
           },
+          showField: true,
         },
         {
           label: 'FISH',

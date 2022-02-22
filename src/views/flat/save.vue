@@ -7,7 +7,7 @@
     cancel-title="Bekor qilish"
     centered
     title="Xonadon qo'shish"
-    @ok="save"
+    @ok.prevent="save"
   >
     <validation-observer
       ref="form"
@@ -48,11 +48,12 @@
               <validation-provider
                 #default="{ errors }"
                 name="Shaxsiy raqam"
-                rules="required"
+                rules="required|min:9|max:10"
               >
                 <b-form-input
                   id="billing_number"
                   v-model="form.billing_number"
+                  v-mask="'##########'"
                   :state="errors.length > 0 ? false:null"
                   name="Shaxsiy raqam"
                   placeholder="000000"
@@ -75,9 +76,10 @@
                 <b-form-input
                   id="number"
                   v-model="form.number"
+                  v-mask="'###'"
                   :state="errors.length > 0 ? false:null"
                   name="Xonadon raqami"
-                  placeholder="000000"
+                  placeholder="000"
                 />
                 <small class="text-danger">{{ errors[0] }}</small>
               </validation-provider>
@@ -136,7 +138,7 @@
               <validation-provider
                 #default="{ errors }"
                 name="Yashovchilar soni"
-                rules="required"
+                rules="required|between:1,20"
               >
                 <b-form-input
                   id="members_count"
@@ -184,7 +186,7 @@
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import { showToast } from '@/utils/toast'
 import { clearObject } from '@/utils'
-import { required, between } from '@validations'
+import { required, between, min, max } from '@validations'
 import { VueMaskDirective } from 'v-mask'
 import {
   BModal, BFormGroup, BFormInput, BForm, BRow, BCol,
@@ -213,6 +215,8 @@ export default {
       visible: false,
       required,
       between,
+      min,
+      max
     }
   },
   computed: {
@@ -235,6 +239,7 @@ export default {
         this.method(this.form).then(res => {
           showToast('success', 'Muvaffaqiyatli saqlandi', 'CheckCircleIcon')
           this.$emit('onSuccess')
+          this.visible = false
         }).catch(err => {
           showToast('danger', 'Xatolik', 'XIcon')
         })

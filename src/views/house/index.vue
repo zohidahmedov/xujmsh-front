@@ -105,12 +105,14 @@ export default {
           centered: true,
         })
         .then(value => {
-          this.destroyAction(id).then(res => {
-            showToast('success', 'Muvaffaqiyatli o\'chirildi')
-            this.getItems()
-          }).catch(() => {
-            showToast('success', 'Muvaffaqiyatli o\'chirildi')
-          })
+          if (value) {
+            this.destroyAction(id).then(res => {
+              showToast('success', 'Muvaffaqiyatli o\'chirildi')
+              this.getItems()
+            }).catch(() => {
+              showToast('success', 'Muvaffaqiyatli o\'chirildi')
+            })
+          }
         })
     },
   },

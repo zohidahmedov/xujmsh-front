@@ -64,53 +64,76 @@
               >
                 <h4>Uyga ko'rsatiladigan xizmatlar uchun to'lov turlari</h4>
               </b-col>
-              <b-col
-                v-for="(service, i) in services"
-                :key="service.id"
-                cols="6"
-              >
-                <b-form-group
-                  :label="service.name + ' uchun'"
-                  label-for="payment_type_id"
-                  label-cols-md="3"
+              <template v-if="!loading">
+                <b-col
+                  v-for="(service, i) in services"
+                  :key="service.id"
+                  cols="6"
                 >
-                  <v-select
-                    id="payment_type_id"
-                    v-model="form.payment_types_ids[i]"
+                  <b-form-checkbox
+                    v-model="form.payment_types[i].checked"
                     :disabled="isShow"
-                    :clearable="false"
-                    :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-                    label="name"
-                    :reduce="(option) => option.id"
-                    :options="service.payment_types"
+                    class="float-left"
+                    style="margin-top: 7px;"
+                    @change="onPaymentTypeChange($event, i)"
+                  />
+                  <b-form-group
+                    :label="service.name + ' uchun'"
+                    label-for="payment_type_id"
+                    label-cols-md="3"
                   >
-                    <template #option="{ name, amount }">
-                      <span style="margin: 0 0 0 0;">
-                        {{ name }}
-                      </span>
-                      <span>{{ amount }} so'm</span>
-                    </template>
-                    <template #selected-option="{ name, amount }">
-                      <span style="margin: 0 10px 0 0;">
-                        {{ name }}
-                      </span>
-                      <span class="text-muted">{{ amount }} so'm</span>
-                    </template>
-                  </v-select>
-                </b-form-group>
-              </b-col>
+                    <v-select
+                      id="payment_type_id"
+                      v-model="form.payment_types[i].id"
+                      :disabled="isShow || !form.payment_types[i].checked"
+                      :clearable="false"
+                      :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
+                      label="name"
+                      :reduce="(option) => option.id"
+                      :options="service.payment_types"
+                    >
+                      <template #option="{ name, amount }">
+                        <span style="margin: 0 0 0 0;">
+                          {{ name }}
+                        </span>
+                        <span>{{ amount }} so'm</span>
+                      </template>
+                      <template #selected-option="{ name, amount }">
+                        <template v-if="!form.payment_types[i].checked">
+                          Ushbu xizmat ko'rsatilmaydi
+                        </template>
+                        <template v-else>
+                          <span style="margin: 0 10px 0 0;">
+                            {{ name }}
+                          </span>
+                          <span class="text-muted">{{ amount }} so'm</span>
+                        </template>
+                      </template>
+                    </v-select>
+                  </b-form-group>
+                </b-col>
+              </template>
             </b-row>
           </b-form>
         </validation-observer>
       </b-overlay>
-      <b-card-footer v-if="!isShow">
+      <b-card-footer class="d-flex justify-content-center">
         <b-button
+          v-if="!isShow"
           variant="primary"
           class="float-right mb-2"
           @click="save"
         >
           <feather-icon icon="CheckIcon" />
           Saqlash
+        </b-button>
+        <b-button
+          v-else
+          variant="primary"
+          :to="{ name: 'house-update', params: { id: this.$route.params.id } }"
+        >
+          <feather-icon icon="EditIcon" />
+          Tahrirlash
         </b-button>
       </b-card-footer>
     </template>
@@ -140,7 +163,7 @@ import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import { showToast } from '@/utils/toast'
 import { required } from '@validations'
 import {
-  BCard, BFormGroup, BFormInput, BForm, BRow, BCol, BCardFooter, BButton, BAlert, BOverlay,
+  BCard, BFormGroup, BFormInput, BForm, BRow, BCol, BCardFooter, BButton, BAlert, BOverlay, BFormCheckbox,
 } from 'bootstrap-vue'
 import { mapActions } from 'vuex'
 import { clearObject } from '@/utils'
@@ -149,7 +172,7 @@ import VSelect from 'vue-select'
 export default {
   name: 'Create',
   components: {
-    BCard, ValidationProvider, ValidationObserver, BFormGroup, BFormInput, BForm, BRow, BCol, VSelect, BCardFooter, BButton, BAlert, BOverlay,
+    BCard, ValidationProvider, ValidationObserver, BFormGroup, BFormInput, BForm, BRow, BCol, VSelect, BCardFooter, BButton, BAlert, BOverlay, BFormCheckbox,
   },
   data() {
     return {
@@ -158,6 +181,7 @@ export default {
         number: null,
         address: null,
         payment_types_ids: [],
+        payment_types: [],
       },
       services: [],
       required,
@@ -186,14 +210,15 @@ export default {
       this.services = res.data.data
       if (this.isShow || this.isUpdate) {
         this.edit()
+
+      } else {
+        this.loading = false
       }
       if (this.isCreate) {
         res.data.data.forEach(item => {
-          this.form.payment_types_ids.push(item.payment_types.find(i => i.is_default).id)
+          this.form.payment_types_ids.push({ checked: true, id: item.payment_types.find(i => i.is_default).id })
         })
       }
-    }).finally(() => {
-      this.loading = false
     })
   },
   methods: {
@@ -201,6 +226,7 @@ export default {
       const valid = await this.validationForm()
       if (valid) {
         this.loading = true
+        this.form.payment_types_ids = this.form.payment_types.filter(item => item.checked).map(item => item.id)
         this.method(this.form).then(res => {
           showToast('success', 'Muvaffaqiyatli saqlandi', 'CheckCircleIcon')
           this.$router.push({ name: 'house-index' })
@@ -216,6 +242,8 @@ export default {
     edit() {
       this.show(this.$route.params.id).then(res => {
         this.setForm(res.data)
+      }).finally(() => {
+        this.loading = false
       })
     },
     setForm(data) {
@@ -223,7 +251,7 @@ export default {
       this.form.number = data.number
       this.form.address = data.address
       this.services.forEach(item => {
-        this.form.payment_types_ids.push(data.payment_types.find(i => i.service_id == item.id).id)
+        this.form.payment_types.push({ checked: true, id: data.payment_types.find(i => i.service_id == item.id).id })
       })
     },
     method(data) {
@@ -236,6 +264,13 @@ export default {
         validated = success
       })
       return validated
+    },
+    onPaymentTypeChange(condition, i) {
+      if (condition) {
+        // if (this.form.payment_types_ids[i]) this.form.payment_types_ids.splice(i, 1)
+      } else {
+
+      }
     },
     ...mapActions({
       store: 'house/store', update: 'house/update', show: 'house/show', getServices: 'service/index',

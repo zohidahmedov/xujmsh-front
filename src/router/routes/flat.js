@@ -14,4 +14,19 @@ export default [
       ],
     },
   },
+  {
+    path: '/flats/:id',
+    name: 'flat-show',
+    component: () => import('@/views/flat/show.vue'),
+    meta: {
+      middleware: 'Auth',
+      pageTitle: 'Xonadonni ko\'rish',
+      breadcrumb: [
+        {
+          text: 'Xonadonni ko\'rish',
+          active: true,
+        },
+      ],
+    },
+  },
 ]
