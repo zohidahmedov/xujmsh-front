@@ -45,7 +45,7 @@ service.interceptors.response.use(
 
 function logout() {
   clearForLogout()
-  return router.push({ name: 'auth-login' })
+  return router.currentRoute.name !== 'auth-login' ? router.push({ name: 'auth-login' }) : ''
 }
 
 export default service

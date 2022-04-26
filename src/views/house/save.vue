@@ -71,7 +71,7 @@
                   cols="6"
                 >
                   <b-form-checkbox
-                    v-model="form.payment_types[i].checked"
+                    v-model="form.payment_types_ids[i].checked"
                     :disabled="isShow"
                     class="float-left"
                     style="margin-top: 7px;"
@@ -84,8 +84,8 @@
                   >
                     <v-select
                       id="payment_type_id"
-                      v-model="form.payment_types[i].id"
-                      :disabled="isShow || !form.payment_types[i].checked"
+                      v-model="form.payment_types_ids[i].id"
+                      :disabled="isShow || !form.payment_types_ids[i].checked"
                       :clearable="false"
                       :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
                       label="name"
@@ -99,7 +99,7 @@
                         <span>{{ amount }} so'm</span>
                       </template>
                       <template #selected-option="{ name, amount }">
-                        <template v-if="!form.payment_types[i].checked">
+                        <template v-if="!form.payment_types_ids[i].checked">
                           Ushbu xizmat ko'rsatilmaydi
                         </template>
                         <template v-else>
@@ -181,7 +181,6 @@ export default {
         number: null,
         address: null,
         payment_types_ids: [],
-        payment_types: [],
       },
       services: [],
       required,
@@ -206,11 +205,10 @@ export default {
   },
   created() {
     this.loading = true
-    this.getServices({ per_page: 999 }).then(res => {
+    this.getServices({ per_page: 999, sort_key: 'id', sort_type: 'asc' }).then(res => {
       this.services = res.data.data
       if (this.isShow || this.isUpdate) {
         this.edit()
-
       } else {
         this.loading = false
       }
@@ -226,12 +224,10 @@ export default {
       const valid = await this.validationForm()
       if (valid) {
         this.loading = true
-        this.form.payment_types_ids = this.form.payment_types.filter(item => item.checked).map(item => item.id)
+        this.form.payment_types_ids = this.form.payment_types_ids.filter(item => item.checked).map(item => item.id)
         this.method(this.form).then(res => {
           showToast('success', 'Muvaffaqiyatli saqlandi', 'CheckCircleIcon')
           this.$router.push({ name: 'house-index' })
-        }).catch(err => {
-          showToast('danger', 'Xatolik', 'XIcon')
         }).finally(() => {
           this.loading = false
         })
@@ -251,7 +247,9 @@ export default {
       this.form.number = data.number
       this.form.address = data.address
       this.services.forEach(item => {
-        this.form.payment_types.push({ checked: true, id: data.payment_types.find(i => i.service_id == item.id).id })
+        const type = data.payment_types.find(i => i.service_id === item.id)
+        const checked = !! data.payment_types.find(i => i.service_id == item.id)
+        this.form.payment_types_ids.push({ checked, id: checked ? type.id : item.default_payment_type.id })
       })
     },
     method(data) {

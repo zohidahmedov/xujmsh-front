@@ -97,13 +97,15 @@
                   <small class="text-danger">{{ errors[0] }}</small>
                 </validation-provider>
               </b-form-group>
-              <b-button
-                type="submit"
-                variant="primary"
-                block
-              >
-                Кириш
-              </b-button>
+              <b-overlay :show="loading">
+                <b-button
+                  type="submit"
+                  variant="primary"
+                  block
+                >
+                  Кириш
+                </b-button>
+              </b-overlay>
             </b-form>
           </validation-observer>
         </b-col>
@@ -117,7 +119,7 @@
 /* eslint-disable global-require */
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import {
-  BRow, BCol, BLink, BFormGroup, BFormInput, BInputGroupAppend, BInputGroup, BCardTitle, BImg, BForm, BButton, VBTooltip,
+  BRow, BCol, BLink, BFormGroup, BFormInput, BInputGroupAppend, BInputGroup, BCardTitle, BImg, BForm, BButton, VBTooltip, BOverlay
 } from 'bootstrap-vue'
 import VuexyLogo from '@core/layouts/components/Logo.vue'
 import { required } from '@validations'
@@ -143,6 +145,7 @@ export default {
     VuexyLogo,
     ValidationProvider,
     ValidationObserver,
+    BOverlay
   },
   mixins: [togglePasswordVisibility],
   data() {

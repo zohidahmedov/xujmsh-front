@@ -142,8 +142,6 @@ export default {
           showToast('success', 'Muvaffaqiyatli saqlandi', 'CheckCircleIcon')
           this.$emit('onSuccess')
           this.visible = false
-        }).catch(err => {
-          showToast('danger', 'Xatolik', 'XIcon')
         })
       } else {
         showToast('warning', 'Talab qilingan maydonlarni to\'ldiring')
