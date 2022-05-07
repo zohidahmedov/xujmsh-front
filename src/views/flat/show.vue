@@ -77,23 +77,23 @@
     </b-col>
     <b-col md="4">
       <b-card>
-        <b-form-group
-          label="Uy raqami"
-          label-for="number"
-        >
-          <validation-provider
-            name="Uy raqami"
-            rules="required"
-          >
+        <b-col cols="12" class="my-2">
+          <h4>To'lov qilish</h4>
+        </b-col>
+        <b-col v-for="(service) in services" :key="service.id" cols="12">
+          <b-form-checkbox
+            v-model="form.payment_types_ids[i].checked"
+            :disabled="isShow"
+            class="float-left"
+            style="margin-top: 7px;"
+            @change="onPaymentTypeChange($event, i)"
+          />
+          <b-form-group :label="service.name + ' uchun'" label-for="number" label-cols-md="6">
             <b-form-input
               id="number"
-              v-model="form.number"
-              name="Uy raqami"
-              placeholder="188-A"
             />
-          </validation-provider>
-        </b-form-group>
-
+          </b-form-group>
+        </b-col>
 
         <!-- submit and reset -->
         <b-col offset-md="4">
@@ -190,6 +190,7 @@ export default {
     BRow,
     BCol,
     BFormGroup,
+    BFormInput,
     BForm,
     BCard,
     BCardHeader,
@@ -248,6 +249,16 @@ export default {
       } else {
         showToast('warning', 'Talab qilingan maydonlarni to\'ldiring')
       }
+    },
+    setForm(data) {
+      this.form.id = data.id
+      this.form.number = data.number
+      this.form.address = data.address
+      this.services.forEach(item => {
+        const type = data.payment_types.find(i => i.service_id === item.id)
+        const checked = !! data.payment_types.find(i => i.service_id === item.id)
+        this.form.payment_types_ids.push({ checked, id: checked ? type.id : item.default_payment_type.id })
+      })
     },
     ...mapActions({
       getItem: 'flat/show',
