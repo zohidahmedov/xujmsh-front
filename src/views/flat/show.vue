@@ -80,18 +80,26 @@
         <b-col cols="12" class="my-2">
           <h4>To'lov qilish</h4>
         </b-col>
-        <b-col v-for="(service) in services" :key="service.id" cols="12">
+        <b-col v-for="(service, i) in services" :key="service.id" cols="12">
           <b-form-checkbox
             v-model="form.payment_types_ids[i].checked"
-            :disabled="isShow"
             class="float-left"
             style="margin-top: 7px;"
             @change="onPaymentTypeChange($event, i)"
           />
-          <b-form-group :label="service.name + ' uchun'" label-for="number" label-cols-md="6">
+          <b-form-group :label="service.name + ' uchun'" label-for="payment_type_id" label-cols-md="3">
             <b-form-input
-              id="number"
+              v-if="!form.payment_types_ids[i].checked"
+              id="service.id"
+              disabled="true"
+              placeholder="Ushbu xizmat ko'rsatilmaydi"
+              v-model="form.amount[form.payment_types_ids[i].id]"
             />
+            <b-form-input
+              v-else
+              id="service.id"
+              placeholder="Summani kiriting"
+              v-model="form.amount[form.payment_types_ids[i].id]"/>
           </b-form-group>
         </b-col>
 
@@ -114,52 +122,16 @@
             <b-card-title>So'nggi to'lovlar</b-card-title>
           </div>
         </b-card-header>
-        <b-card-body>
-          <table class="table table-b-table-default">
-            <tr>
-              <th>Shaxsiy raqam</th>
-              <td class="text-primary">
-                {{ item.billing_number }}
-              </td>
-            </tr>
-            <tr>
-              <th>Uy raqami</th>
-              <td class="text-primary">
-                {{ item.house.number }}
-              </td>
-            </tr>
-            <tr>
-              <th>Xonadon raqami</th>
-              <td class="text-primary">
-                {{ item.number }}
-              </td>
-            </tr>
-            <tr>
-              <th>FISH</th>
-              <td class="text-primary">
-                {{ item.full_name }}
-              </td>
-            </tr>
-            <tr>
-              <th>Telefon raqami</th>
-              <td class="text-primary">
-                {{ item.phone }}
-              </td>
-            </tr>
-            <tr>
-              <th>Yashovchilar soni</th>
-              <td class="text-primary">
-                {{ item.members_count }} ta
-              </td>
-            </tr>
-            <tr>
-              <th>Umumiy maydoni</th>
-              <td class="text-primary">
-                {{ item.area }} m <sup>2</sup>
-              </td>
-            </tr>
-          </table>
-        </b-card-body>
+        <b-col v-for="(service, i) in services" :key="service.id" cols="12">
+          <b-form-group :label="service.name + ' uchun'" label-for="payment_type_id" label-cols-md="3">
+            <b-form-input
+              id="service.id"
+              disabled="true"
+              v-model="service.name"
+              value="service.name"
+            />
+          </b-form-group>
+        </b-col>
       </b-card>
     </b-col>
   </b-row>
@@ -178,11 +150,13 @@ import {
   BDropdown,
   BFormGroup,
   BFormInput,
-  BFormCheckbox, BInputGroup, BInputGroupPrepend, BForm,
+  BFormCheckbox,
+  BInputGroup, BInputGroupPrepend, BForm,
 } from 'bootstrap-vue'
 import { mapActions, mapGetters } from 'vuex'
 import BCardCode from '@core/components/b-card-code'
 import { showToast } from '@/utils/toast'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'Show',
@@ -199,12 +173,14 @@ export default {
     BDropdownItem,
     BDropdown,
     BCardBody,
+    BFormCheckbox,
   },
   data() {
     return {
       form: {
-        number: null,
+        number: '',
         payment_types_ids: [],
+        amount: [],
       },
       loading: false,
       services: [],
@@ -216,53 +192,69 @@ export default {
     id() {
       return this.$route.params.id
     },
+    isUpdate() {
+      return this.$route.name === 'house-update'
+    },
+    isShow() {
+      return this.$route.name === 'house-show'
+    },
+    isCreate() {
+      return this.$route.name === 'house-create'
+    },
   },
   created() {
-    // eslint-disable-next-line no-unused-expressions
+    // eslint-disable-next-line no-unused-expressions,no-sequences
     this.getItem(this.id),
-    this.getServices({ per_page: 999, sort_key: 'id', sort_type: 'asc' }).then(res => {
+    this.getServices(this.id).then(res => {
       this.services = res.data.data
       if (this.isShow || this.isUpdate) {
         this.edit()
       } else {
         this.loading = false
       }
-      if (this.isCreate) {
-        res.data.data.forEach(item => {
-          this.form.payment_types_ids.push({ checked: true, id: item.payment_types.find(i => i.is_default).id })
-        })
-      }
+      res.data.data.forEach(item => {
+        this.form.payment_types_ids.push({ checked: true, id: item.payment_types.find(i => i.is_default).id })
+      })
     })
   },
   methods: {
     async save() {
-      const valid = await this.validationForm()
-      if (valid) {
-        this.loading = true
-        this.form.payment_types_ids = this.form.payment_types_ids.filter(item => item.checked).map(item => item.id)
-        this.method(this.form).then(res => {
-          showToast('success', 'Muvaffaqiyatli saqlandi', 'CheckCircleIcon')
-          this.$router.push({ name: 'house-index' })
-        }).finally(() => {
-          this.loading = false
+      this.loading = true
+      console.log('kelli')
+      this.form.payment_types_ids = this.form.payment_types_ids.filter(item => item.checked).map(item => item.id)
+      this.setAmount({ data: this.form })
+        .then(res => {
+          if (res.success) {
+            this.$router.push({ name: 'Show' })
+            Swal.fire({
+              title: this.$t('Маълумот сақланди!'),
+              type: 'success',
+              timer: 1500,
+              showConfirmButton: false,
+              confirmButtonText: 'Давом этиш',
+            })
+          } else {
+            Swal.fire({
+              title: this.$t('Серверда хатолик рўй берди!'),
+              type: 'error',
+              timer: 2000,
+              showConfirmButton: false,
+              confirmButtonText: 'Давом этиш',
+            })
+          }
         })
-      } else {
-        showToast('warning', 'Talab qilingan maydonlarni to\'ldiring')
-      }
     },
-    setForm(data) {
-      this.form.id = data.id
-      this.form.number = data.number
-      this.form.address = data.address
-      this.services.forEach(item => {
-        const type = data.payment_types.find(i => i.service_id === item.id)
-        const checked = !! data.payment_types.find(i => i.service_id === item.id)
-        this.form.payment_types_ids.push({ checked, id: checked ? type.id : item.default_payment_type.id })
-      })
+    onPaymentTypeChange(condition, i) {
+      if (condition) {
+        // if (this.form.payment_types_ids[i]) this.form.payment_types_ids.splice(i, 1)
+      } else {
+
+      }
     },
     ...mapActions({
       getItem: 'flat/show',
-      getServices: 'service/index',
+      getServices: 'amount/service',
+      setAmount: 'amount/store',
     }),
   },
 }

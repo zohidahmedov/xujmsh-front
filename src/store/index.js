@@ -9,6 +9,7 @@ import verticalMenu from './vertical-menu'
 import alert from './alert'
 import auth from './auth'
 import house from './house'
+import amount from './amount'
 import flat from './flat'
 import service from './service'
 import paymentType from './payment-type'
@@ -25,6 +26,7 @@ export default new Vuex.Store({
     house,
     flat,
     service,
+    amount,
     paymentType,
     'app-ecommerce': ecommerceStoreModule,
   },
