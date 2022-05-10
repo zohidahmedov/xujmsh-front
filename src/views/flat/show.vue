@@ -72,34 +72,57 @@
             </tr>
           </table>
         </b-card-body>
-        </b-card-body>
       </b-card>
     </b-col>
     <b-col md="4">
       <b-card>
-        <b-col cols="12" class="my-2">
+        <b-col
+          cols="12"
+          class="my-2"
+        >
           <h4>To'lov qilish</h4>
         </b-col>
-        <b-col v-for="(service, i) in services" :key="service.id" cols="12">
+        <b-col
+          v-if="form.payment_types_ids[i].has"
+          data="form"
+          v-for="(service, i) in services"
+          :key="service.id"
+          cols="12"
+        >
           <b-form-checkbox
             v-model="form.payment_types_ids[i].checked"
             class="float-left"
             style="margin-top: 7px;"
             @change="onPaymentTypeChange($event, i)"
           />
-          <b-form-group :label="service.name + ' uchun'" label-for="payment_type_id" label-cols-md="3">
-            <b-form-input
-              v-if="!form.payment_types_ids[i].checked"
-              id="service.id"
-              disabled="true"
-              placeholder="Ushbu xizmat ko'rsatilmaydi"
-              v-model="form.amount[form.payment_types_ids[i].id]"
-            />
+          <b-form-group
+            :label="service.name + ' uchun'"
+            label-for="payment_type_id"
+            label-cols-md="3"
+          >
+            <validation-provider
+                v-if="!form.payment_types_ids[i].checked"
+                #default="{ errors }"
+              name="Yashovchilar soni"
+              rules="required|between:1,20"
+            >
+              <b-form-input
+                id="id"
+                v-model="form.amount[form.payment_types_ids[i].id]"
+                type="number"
+                :state="errors.length > 0 ? false:null"
+                disabled="true"
+                placeholder="Ushbu xizmat ko'rsatilmaydi"
+              />
+              <small class="text-danger">{{ errors[0] }}</small>
+            </validation-provider>
+
             <b-form-input
               v-else
               id="service.id"
+              v-model="form.amount[form.payment_types_ids[i].id]"
               placeholder="Summani kiriting"
-              v-model="form.amount[form.payment_types_ids[i].id]"/>
+            />
           </b-form-group>
         </b-col>
 
@@ -112,25 +135,6 @@
             <feather-icon icon="CheckIcon" />
             Saqlash
           </b-button>
-        </b-col>
-      </b-card>
-    </b-col>
-    <b-col md="4">
-      <b-card>
-        <b-card-header class="align-items-baseline">
-          <div>
-            <b-card-title>So'nggi to'lovlar</b-card-title>
-          </div>
-        </b-card-header>
-        <b-col v-for="(service, i) in services" :key="service.id" cols="12">
-          <b-form-group :label="service.name + ' uchun'" label-for="payment_type_id" label-cols-md="3">
-            <b-form-input
-              id="service.id"
-              disabled="true"
-              v-model="service.name"
-              value="service.name"
-            />
-          </b-form-group>
         </b-col>
       </b-card>
     </b-col>
@@ -151,21 +155,22 @@ import {
   BFormGroup,
   BFormInput,
   BFormCheckbox,
-  BInputGroup, BInputGroupPrepend, BForm,
+
 } from 'bootstrap-vue'
 import { mapActions, mapGetters } from 'vuex'
-import BCardCode from '@core/components/b-card-code'
-import { showToast } from '@/utils/toast'
 import Swal from 'sweetalert2'
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
 export default {
   name: 'Show',
   components: {
+    ValidationProvider,
+    // eslint-disable-next-line vue/no-unused-components
+    ValidationObserver,
     BRow,
     BCol,
     BFormGroup,
     BFormInput,
-    BForm,
     BCard,
     BCardHeader,
     BCardTitle,
@@ -178,7 +183,7 @@ export default {
   data() {
     return {
       form: {
-        number: '',
+        flat_id: '',
         payment_types_ids: [],
         amount: [],
       },
@@ -188,41 +193,26 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({ item: 'flat/GET_ITEM' }),
+    ...mapGetters({ items: 'amount/GET_ITEMS', item: 'flat/GET_ITEM' }),
     id() {
       return this.$route.params.id
     },
-    isUpdate() {
-      return this.$route.name === 'house-update'
-    },
-    isShow() {
-      return this.$route.name === 'house-show'
-    },
-    isCreate() {
-      return this.$route.name === 'house-create'
-    },
   },
   created() {
-    // eslint-disable-next-line no-unused-expressions,no-sequences
-    this.getItem(this.id),
-    this.getServices(this.id).then(res => {
+    this.getItem(this.id)
+    this.getServices({ per_page: 999, sort_key: 'id', sort_type: 'asc' }).then(res => {
+      // this.loading = true
       this.services = res.data.data
-      if (this.isShow || this.isUpdate) {
-        this.edit()
-      } else {
-        this.loading = false
-      }
-      res.data.data.forEach(item => {
-        this.form.payment_types_ids.push({ checked: true, id: item.payment_types.find(i => i.is_default).id })
-      })
+      this.edit()
     })
   },
   methods: {
     async save() {
       this.loading = true
       console.log('kelli')
+      this.form.flat_id = this.item.id
       this.form.payment_types_ids = this.form.payment_types_ids.filter(item => item.checked).map(item => item.id)
-      this.setAmount({ data: this.form })
+      this.setAmount(this.form)
         .then(res => {
           if (res.success) {
             this.$router.push({ name: 'Show' })
@@ -244,17 +234,45 @@ export default {
           }
         })
     },
+    async validationForm() {
+      let validated = false
+      await this.$refs.form.validate().then(success => {
+        validated = success
+      })
+      return validated
+    },
     onPaymentTypeChange(condition, i) {
       if (condition) {
         // if (this.form.payment_types_ids[i]) this.form.payment_types_ids.splice(i, 1)
+        // eslint-disable-next-line no-empty
       } else {
 
       }
     },
+    edit() {
+      this.show(this.$route.params.id).then(res => {
+        this.setForm(res.data.house)
+      }).finally(() => {
+        this.loading = true
+      })
+    },
+    setForm(data) {
+      console.log(data)
+      this.services.forEach(item => {
+        const type = data.payment_types.find(i => i.service_id === item.id)
+        const checked = !!data.payment_types.find(i => i.service_id === item.id)
+        // if (type) {
+          this.form.payment_types_ids.push({ checked, id: checked ? type.id : item.default_payment_type.id, has: checked ? true : false })
+        // }
+      })
+      console.log(this.form)
+    },
     ...mapActions({
       getItem: 'flat/show',
-      getServices: 'amount/service',
+      getFlatServices: 'amount/service',
+      getServices: 'service/index',
       setAmount: 'amount/store',
+      show: 'flat/show',
     }),
   },
 }

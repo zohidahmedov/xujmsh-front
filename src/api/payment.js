@@ -1,6 +1,6 @@
 import request from '../libs/axios'
 
-const slug = '/amount'
+const slug = '/payments'
 
 // eslint-disable-next-line import/prefer-default-export
 export function store(data) {

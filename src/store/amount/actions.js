@@ -1,11 +1,10 @@
 import {
-  store, service
-} from '@/api/amount'
-import { show } from '@/api/service'
+  store, service,
+} from '@/api/payment'
 
 export const actions = {
   // eslint-disable-next-line no-unused-vars
-  store({ commit }, data) {
+  store(commit, data) {
     return new Promise((resolve, reject) => {
       store(data)
         .then(res => {
@@ -19,8 +18,8 @@ export const actions = {
   service({ commit }, id) {
     return new Promise((resolve, reject) => {
       service(id).then(res => {
-        console.log(res)
-        commit('SET_ITEMS', res.data)
+        // console.log(res.data)
+        commit('SET_ITEMS', res)
         resolve(res)
       }).catch(error => {
         reject(error)
